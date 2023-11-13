@@ -1,0 +1,29 @@
+version: "3"
+services:  
+  focalboard-db:
+    image: mysql:latest
+    container_name: focalboard-db
+    environment:
+      MYSQL_USER: focalboard
+      MYSQL_PASSWORD: powerpassword
+      MYSQL_DATABASE: focalboard
+      MYSQL_ROOT_PASSWORD: powerpassword
+    volumes:
+      - focalboard-db:/var/lib/mysql
+    restart: unless-stopped
+
+  focalboard:
+    image: navystack/focalboard:latest
+    container_name: focalboard
+    volumes:
+      - fbdata:/opt/focalboard/data
+      - ./config.json:/opt/focalboard/config.json
+    ports:
+      - 8282:8000
+    depends_on:
+      - focalboard-db
+    restart: unless-stopped
+    
+volumes:
+  fbdata:
+  focalboard-db:
