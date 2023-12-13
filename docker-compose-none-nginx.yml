@@ -13,13 +13,13 @@ services:
     restart: unless-stopped
 
   focalboard:
-    image: navystack/focalboard:nginx
+    image: navystack/focalboard:latest
     container_name: focalboard
     volumes:
       - fbdata:/opt/focalboard/data
       - ./config.json:/opt/focalboard/config.json
     ports:
-      - 8282:80
+      - 8282:8000
     depends_on:
       - focalboard-db
     restart: unless-stopped

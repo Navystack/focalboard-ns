@@ -1,9 +1,10 @@
 {
   "serverRoot": "http://localhost:8000",
   "port": 8000,
-  "dbtype": "mysql",
-  "dbconfig": "focalboard:powerpassword@tcp(focalboard-db:3306)/focalboard",
-  "useSSL": false,
+  "dbtype": "postgres",
+  "dbconfig": "postgres://username:password@myserver.postgres.database.azure.com/database_name?sslmode=require&sslrootcert=/opt/focalboard/data/DigiCertGlobalRootCA.crt.pem&connect_timeout=10",
+  "postgres_dbconfig": "dbname=database_name sslmode=require sslrootcert=/opt/focalboard/data/DigiCertGlobalRootCA.crt.pem",
+  "useSSL": true,
   "webpath": "./pack",
   "filespath": "./data/files",
   "telemetry": true,
