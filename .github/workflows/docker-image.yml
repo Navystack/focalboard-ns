@@ -38,34 +38,6 @@ jobs:
       - name: set env
         run: echo "NOW=$(date +'%Y.%m.%d')" >> $GITHUB_ENV
 
-      - name: Docker Build and Push (NODE_BUILDER)
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: |
-            navystack/focalboard:nodebuild-cache
-          file: Dockerfiles/nodebuild.Dockerfile
-          platforms: |
-            linux/amd64
-            linux/arm64
-          cache-from: type=registry,ref=navystack/focalboard:nodebuild-cache
-          cache-to: type=registry,ref=navystack/focalboard:nodebuild-cache,mode=max
-
-      - name: Docker Build and Push (GO_BUILDER)
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: |
-            navystack/focalboard:gobuild-cache
-          file: Dockerfiles/gobuild.Dockerfile
-          platforms: |
-            linux/amd64
-            linux/arm64
-          cache-from: type=registry,ref=navystack/focalboard:gobuild-cache
-          cache-to: type=registry,ref=navystack/focalboard:gobuild-cache,mode=max
-
       - name: Docker Build and Push (Focalboard Only)
         uses: docker/build-push-action@v5
         with:
@@ -78,8 +50,6 @@ jobs:
           platforms: |
             linux/amd64
             linux/arm64
-          cache-from: ${{ secrets.BUILD_CACHE_FROM }}
-          cache-to: ${{ secrets.BUILD_CACHE_TO }}
 
       - name: Docker Build and Push (with Nginx)
         uses: docker/build-push-action@v5
@@ -93,8 +63,6 @@ jobs:
           platforms: |
             linux/amd64
             linux/arm64
-          cache-from: ${{ secrets.BUILD_CACHE_FROM }}
-          cache-to: ${{ secrets.BUILD_CACHE_TO }}
 
       - name: Docker Build and Push (with Openresty)
         uses: docker/build-push-action@v5
@@ -108,5 +76,3 @@ jobs:
           platforms: |
             linux/amd64
             linux/arm64
-          cache-from: ${{ secrets.BUILD_CACHE_FROM }}
-          cache-to: ${{ secrets.BUILD_CACHE_TO }}
