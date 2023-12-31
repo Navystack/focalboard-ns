@@ -38,15 +38,15 @@ jobs:
       - name: set env
         run: echo "NOW=$(date +'%Y.%m.%d')" >> $GITHUB_ENV
 
-      - name: Docker Build and Push (Focalboard Only)
+      - name: Docker Build and Push (with Openresty)
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: |
-            navystack/focalboard:latest-${{ env.NOW }}
-            navystack/focalboard:latest
-            navystack/focalboard:7.12.0
+            navystack/focalboard:openresty-${{ env.NOW }}
+            navystack/focalboard:openresty
+          file: Openresty.Dockerfile
           platforms: |
             linux/amd64
             linux/arm64
@@ -64,15 +64,15 @@ jobs:
             linux/amd64
             linux/arm64
 
-      - name: Docker Build and Push (with Openresty)
+      - name: Docker Build and Push (Focalboard Only)
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: |
-            navystack/focalboard:openresty-${{ env.NOW }}
-            navystack/focalboard:openresty
-          file: Openresty.Dockerfile
+            navystack/focalboard:latest-${{ env.NOW }}
+            navystack/focalboard:7.12.0
+            navystack/focalboard:latest
           platforms: |
             linux/amd64
             linux/arm64
