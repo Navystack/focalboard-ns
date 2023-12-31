@@ -1,13 +1,27 @@
 ARG NGINX_VERSION=1.25.3
-ARG NODE_VERSION=18-bookworm
+ARG FINAL_VERSION=bookworm-slim
+ARG TARGETOS
+ARG TARGETARCH
 
-FROM navystack/focalboard:nodebuild-cache as nodebuild
-FROM navystack/focalboard:gobuild-cache AS gobuild
-FROM navystack/ngx_mod:${NGINX_VERSION} as layershorter-nginx-moduler
+FROM node:lts as base
+WORKDIR /focalboard
+RUN git clone https://github.com/NavyStack/focalboard.git .
+
+FROM base AS nodebuild
+WORKDIR /focalboard/webapp
+RUN CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm install --no-optional && \
+    npm run pack
+
+FROM golang:bookworm AS gobuild
+COPY --from=base /focalboard /go/src/focalboard
+WORKDIR /go/src/focalboard
+RUN EXCLUDE_PLUGIN=true EXCLUDE_SERVER=true EXCLUDE_ENTERPRISE=true make server-docker os=${TARGETOS} arch=${TARGETARCH}
+
+FROM navystack/ngx_mod:${NGINX_VERSION} AS layershorter
 
 RUN mkdir -p /opt/focalboard/data/files && \
     chown -R nobody:nogroup /opt/focalboard
-COPY --from=nodebuild --chown=nobody:nogroup /webapp/pack /opt/focalboard/pack/
+COPY --from=nodebuild --chown=nobody:nogroup /focalboard/webapp/pack /opt/focalboard/pack/
 COPY --from=gobuild --chown=nobody:nogroup /go/src/focalboard/bin/docker/focalboard-server /opt/focalboard/bin/
 COPY --from=gobuild --chown=nobody:nogroup /go/src/focalboard/LICENSE.txt /opt/focalboard/LICENSE.txt
 COPY --from=gobuild --chown=nobody:nogroup /go/src/focalboard/docker/server_config.json /opt/focalboard/config.json
@@ -15,21 +29,13 @@ COPY --from=gobuild --chown=nobody:nogroup /go/src/focalboard/docker/server_conf
 FROM nginx:${NGINX_VERSION} as final
 
 WORKDIR /opt/focalboard
-COPY --from=layershorter-nginx-moduler --chown=nobody:nogroup /opt/focalboard/ /opt/focalboard
-COPY --from=layershorter-nginx-moduler /usr/lib/nginx/modules/*.so /usr/lib/nginx/modules/
+COPY --from=layershorter --chown=nobody:nogroup /opt/focalboard/ /opt/focalboard
+COPY --from=layershorter /usr/lib/nginx/modules/*.so /usr/lib/nginx/modules/
+COPY --from=layershorter /etc/nginx/nginx.conf /etc/nginx/nginx.conf
 EXPOSE 80/tcp 9092/tcp
 VOLUME /opt/focalboard/data
 
-RUN mkdir -p /var/run/ngx_pagespeed_cache && \
-    mkdir -p /var/run/nginx-cache && \
-    chown www-data:www-data /var/run/ngx_pagespeed_cache && \
-    chown www-data:www-data /var/run/nginx-cache && \
-    echo "load_module modules/ngx_pagespeed.so;\n$(cat /etc/nginx/nginx.conf)" > /etc/nginx/nginx.conf && \
-    echo "load_module modules/ngx_http_immutable_module.so;\n$(cat /etc/nginx/nginx.conf)" > /etc/nginx/nginx.conf && \
-    echo "load_module modules/ngx_http_cache_purge_module.so;\n$(cat /etc/nginx/nginx.conf)" > /etc/nginx/nginx.conf && \
-    echo "load_module modules/ngx_http_brotli_static_module.so;\n$(cat /etc/nginx/nginx.conf)" > /etc/nginx/nginx.conf && \
-    echo "load_module modules/ngx_http_brotli_filter_module.so;\n$(cat /etc/nginx/nginx.conf)" > /etc/nginx/nginx.conf && \
-    rm -rf /etc/nginx/conf.d/default.conf && \
+RUN rm -rf /etc/nginx/conf.d/default.conf && \
     cat <<"EOF" > /etc/nginx/conf.d/default.conf
 ########################
 # Virtual Host Configs #
@@ -44,7 +50,7 @@ server {
     server_name _;
 
     pagespeed standby;
-    pagespeed FileCachePath /var/run/ngx_pagespeed_cache;
+    pagespeed FileCachePath /var/cache/nginx/ngx_pagespeed_cache;
     pagespeed XHeaderValue "";
 
     #################
@@ -53,7 +59,6 @@ server {
     gzip on;
     gzip_disable "msie6";
     gzip_vary on;
-    gzip_proxied any;
     gzip_comp_level 1;
     gzip_buffers 16 8k;
     gzip_http_version 1.1;
@@ -142,5 +147,4 @@ server {
 EOF
 
 ADD scripts/focalboard-nginx.sh /
-
 CMD ["/focalboard-nginx.sh"]

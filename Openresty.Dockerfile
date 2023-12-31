@@ -1,13 +1,27 @@
 ARG OPENRESTY_VERSION=openresty-1.21.4.3
 ARG OPENRESTY_DOCKER_VERSION=1.21.4.3-jammy
+ARG TARGETOS
+ARG TARGETARCH
 
-FROM navystack/focalboard:nodebuild-cache AS nodebuild
-FROM navystack/focalboard:gobuild-cache AS gobuild
+FROM node:lts as base
+WORKDIR /focalboard
+RUN git clone https://github.com/NavyStack/focalboard.git .
+
+FROM base AS nodebuild
+WORKDIR /focalboard/webapp
+RUN CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm install --no-optional && \
+    npm run pack
+
+FROM golang:bookworm AS gobuild
+COPY --from=base /focalboard /go/src/focalboard
+WORKDIR /go/src/focalboard
+RUN EXCLUDE_PLUGIN=true EXCLUDE_SERVER=true EXCLUDE_ENTERPRISE=true make server-docker os=${TARGETOS} arch=${TARGETARCH}
+
 FROM navystack/ngx_mod:${OPENRESTY_VERSION} AS layershorter
 
 RUN mkdir -p /opt/focalboard/data/files && \
     chown -R nobody:nogroup /opt/focalboard
-COPY --from=nodebuild --chown=nobody:nogroup /webapp/pack /opt/focalboard/pack/
+COPY --from=nodebuild --chown=nobody:nogroup /focalboard/webapp/pack /opt/focalboard/pack/
 COPY --from=gobuild --chown=nobody:nogroup /go/src/focalboard/bin/docker/focalboard-server /opt/focalboard/bin/
 COPY --from=gobuild --chown=nobody:nogroup /go/src/focalboard/LICENSE.txt /opt/focalboard/LICENSE.txt
 COPY --from=gobuild --chown=nobody:nogroup /go/src/focalboard/docker/server_config.json /opt/focalboard/config.json
@@ -17,14 +31,11 @@ FROM openresty/openresty:${OPENRESTY_DOCKER_VERSION} AS final
 WORKDIR /opt/focalboard
 COPY --from=layershorter --chown=nobody:nogroup /opt/focalboard/ /opt/focalboard
 COPY --from=layershorter /usr/local/openresty/nginx/modules /usr/local/openresty/nginx/modules
+COPY --from=layershorter /usr/local/openresty/nginx/conf/nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
 EXPOSE 80/tcp 9092/tcp
 VOLUME /opt/focalboard/data
 
-RUN mkdir -p /var/run/ngx_pagespeed_cache && \
-    mkdir -p /var/run/nginx-cache && \
-    chown www-data:www-data /var/run/ngx_pagespeed_cache && \
-    chown www-data:www-data /var/run/nginx-cache && \
-    rm -rf /etc/nginx/conf.d/default.conf && \
+RUN rm -rf /etc/nginx/conf.d/default.conf && \
     cat <<"EOF" > /etc/nginx/conf.d/default.conf
 ########################
 # Virtual Host Configs #
@@ -39,7 +50,7 @@ server {
     server_name _;
 
     pagespeed standby;
-    pagespeed FileCachePath /var/run/ngx_pagespeed_cache;
+    pagespeed FileCachePath /var/run/openresty/ngx_pagespeed_cache;
     pagespeed XHeaderValue "";
 
     #################
@@ -136,6 +147,5 @@ server {
 }
 EOF
 
-ADD openresty/nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
 ADD scripts/focalboard-openresty.sh /
 CMD ["/focalboard-openresty.sh"]
