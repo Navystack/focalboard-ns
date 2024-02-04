@@ -2,6 +2,7 @@ version: "3"
 services:
   focalboard-db:
     image: mysql:latest
+    restart: unless-stopped
     container_name: focalboard-db # 이 친구가 데이터베이스 서버 주소가 됩니다.
     environment:
       MYSQL_USER: focalboard # 데이터베이스 사용자
@@ -10,25 +11,38 @@ services:
       MYSQL_ROOT_PASSWORD: powerpassword # 루트 비밀번호
     volumes:
       - focalboard-db:/var/lib/mysql
-    restart: unless-stopped
+    networks:
+      - internal
 
   focalboard:
     image: navystack/focalboard:latest
+    restart: unless-stopped
     container_name: focalboard
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.focalboard-srv.loadbalancer.server.port=8000"
+      
       - "traefik.http.routers.focalboard.rule=Host(`focalboard.navystack.com`)" # 도메인만 수정
+      
       - "traefik.http.routers.focalboard.entrypoints=websecure"
       - "traefik.http.routers.focalboard.service=focalboard-srv"
       - "traefik.http.routers.focalboard.middlewares=compress-1024@file,websocket@file"
+      
     volumes:
       - fbdata:/opt/focalboard/data
       - ./config.json:/opt/focalboard/config.json
     depends_on:
       - focalboard-db
-    restart: unless-stopped
+
+    networks:
+      - traefik-network
+      - internal
 
 volumes:
   fbdata:
   focalboard-db:
+
+networks:
+  traefik-network:
+    external: true
+  internal:
