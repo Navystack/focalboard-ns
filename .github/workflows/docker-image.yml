@@ -51,19 +51,6 @@ jobs:
           username: ${{ env.REPO_OWNER_LOWERCASE }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Docker Build and Push (with Openresty)
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          tags: |
-            navystack/focalboard:openresty-${{ env.NOW }}
-            navystack/focalboard:openresty
-            ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/focalboard-ns:openresty
-            ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/focalboard-ns:openresty-${{ env.NOW }}
-          file: Openresty.Dockerfile
-          platforms: linux/amd64,linux/arm64
-          outputs: type=image,compression=zstd,compression-level=22,force-compression=true,push=true
-
       - name: Docker Build and Push (with Nginx)
         uses: docker/build-push-action@v5
         with:
@@ -75,7 +62,7 @@ jobs:
             ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/focalboard-ns:nginx-${{ env.NOW }}
           file: Nginx.Dockerfile
           platforms: linux/amd64,linux/arm64
-          outputs: type=image,compression=zstd,compression-level=22,force-compression=true,push=true
+          outputs: type=image,push=true
 
       - name: Docker Build and Push (Focalboard Only)
         uses: docker/build-push-action@v5
@@ -89,4 +76,4 @@ jobs:
             ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/focalboard-ns:nginx-${{ env.NOW }}
             ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/focalboard-ns:latest
           platforms: linux/amd64,linux/arm64
-          outputs: type=image,compression=zstd,compression-level=22,force-compression=true,push=true
+          outputs: type=image,push=true
