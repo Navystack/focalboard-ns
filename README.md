@@ -17,6 +17,10 @@ NavyStack의 가이드 뿐만 아니라, 아니라 모든 종류의 질문을 �
 
 [AskFront.com (에스크프론트) 포럼](https://askfront.com/?github)
 
+## 폰트 변경
+* 폰트 사이즈 변경
+* 폰트 변경 (pretendard)
+
 > [!IMPORTANT]
 > navystack/focalboard:latest 태그를 사용하시는 경우 <br>
 > 앞단에 리버스 프록시 배치하실 분은 반드시 웹소켓 관련 설정을 해줘야 합니다. <br><br>
