@@ -63,7 +63,7 @@ NavyStack의 가이드 뿐만 아니라, 아니라 모든 종류의 질문을 �
 
 - `docker pull navystack/focalboard:nginx` (Nginx 포함, 추천, Inner Port 80)
 
-- `docker pull navystack/focalboard:latest` (Go, Inner Port 9000)
+- `docker pull navystack/focalboard:latest` (Go, Inner Port 8000)
 
 - `docker pull navystack/focalboard:openresty` (Openresty, Inner Port 80)
 
