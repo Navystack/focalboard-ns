@@ -21,13 +21,13 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.focalboard-srv.loadbalancer.server.port=8000"
-      
+
       - "traefik.http.routers.focalboard.rule=Host(`focalboard.navystack.com`)" # 도메인만 수정
-      
+
       - "traefik.http.routers.focalboard.entrypoints=websecure"
       - "traefik.http.routers.focalboard.service=focalboard-srv"
       - "traefik.http.routers.focalboard.middlewares=compress-1024@file,websocket@file"
-      
+
     volumes:
       - fbdata:/opt/focalboard/data
       - ./config.json:/opt/focalboard/config.json

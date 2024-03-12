@@ -9,6 +9,7 @@
 ---
 
 ## Askfront.com
+
 초보자도 자유롭게 질문할 수 있는 포럼을 만들었습니다. <br />
 NavyStack의 가이드 뿐만 아니라, 아니라 모든 종류의 질문을 하실 수 있습니다.
 
@@ -17,9 +18,12 @@ NavyStack의 가이드 뿐만 아니라, 아니라 모든 종류의 질문을 �
 
 [AskFront.com (에스크프론트) 포럼](https://askfront.com/?github)
 
-## 폰트 변경
-* 폰트 사이즈 변경
-* 폰트 변경 (pretendard)
+## to-do
+
+- [x] 폰트 사이즈 변경
+- [x] 폰트 변경 (pretendard)
+- [x] Use tini
+- [ ] gomplate 사용하기
 
 > [!IMPORTANT]
 > navystack/focalboard:latest 태그를 사용하시는 경우 <br>

@@ -1,0 +1,14 @@
+{
+  "name": "focalboard-ns",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "t1": "prettier -w ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "prettier": "^3.2.5"
+  }
+}

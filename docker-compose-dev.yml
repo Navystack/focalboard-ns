@@ -12,14 +12,14 @@ services:
       POSTGRES_PASSWORD: boardsuser-password
 
   focalboard:
-    image: navystack/focalboard:openresty
+    image: navystack/focalboard:nginx
     container_name: focalboard
     volumes:
       - fbdata:/opt/focalboard/data
       - ./config-dev.json:/opt/focalboard/config.json
       - ./nginx/default-dev.conf:/etc/nginx/conf.d/default.conf
     ports:
-      - 8282:8000
+      - 8282:80
     depends_on:
       - focalboard-db
     restart: unless-stopped

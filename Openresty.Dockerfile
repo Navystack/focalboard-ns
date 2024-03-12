@@ -1,6 +1,7 @@
 FROM node:lts as base
 ARG TARGETOS
 ARG TARGETARCH
+
 WORKDIR /focalboard
 RUN git clone https://github.com/NavyStack/focalboard.git .
 
