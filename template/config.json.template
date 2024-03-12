@@ -1,0 +1,17 @@
+{
+  "serverRoot": "{{ .Env.SERVER_ROOT }}:{{ .Env.SERVER_PORT }}",
+  "port": "{{ .Env.SERVER_PORT }}",
+  "dbtype": "{{ .Env.DB_TYPE }}",
+  "dbconfig": "{{ .Env.DB_CONFIG }}",
+  "useSSL": "{{ with .Env.USE_SSL }}{{ . }}{{ else }}false{{ end }}",
+  "webpath": "./pack",
+  "filespath": "./data/files",
+  "telemetry": "{{ with .Env.USE_TELEMETRY }}{{ . }}{{ else }}true{{ end }}",
+  "prometheusaddress": "{{ with .Env.PROMETHEUS_ADDRESS }}{{ . }}{{ else }}:9092{{ end }}",
+  "session_expire_time": "{{ with .Env.SESSION_EXPIRE_TIME }}{{ . }}{{ else }}2592000{{ end }}",
+  "session_refresh_time": "{{ with .Env.SESSION_REFRESH_TIME }}{{ . }}{{ else }}18000{{ end }}",
+  "localOnly": "{{ with .Env.LOCALONLY }}{{ . }}{{ else }}false{{ end }}",
+  "enableLocalMode": "{{ with .Env.ENABLE_LOCALMODE }}{{ . }}{{ else }}true{{ end }}",
+  "localModeSocketLocation": "/var/tmp/focalboard_local.socket",
+  "enablePublicSharedBoards": "{{ with .Env.ENABL_PUBLIC_SHAREDBOARDS }}{{ . }}{{ else }}true{{ end }}"
+}
