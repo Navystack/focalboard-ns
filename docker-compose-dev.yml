@@ -12,7 +12,7 @@ services:
       POSTGRES_PASSWORD: boardsuser-password
 
   focalboard:
-    image: navystack/focalboard:dev
+    image: navystack/focalboard:nginx
     container_name: focalboard
     volumes:
       - fbdata:/opt/focalboard/data
