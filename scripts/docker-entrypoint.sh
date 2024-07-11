@@ -1,6 +1,14 @@
 #!/bin/bash
 
-# Required environment variables
+# Required environment variables with their default values
+DB_TYPE="${DB_TYPE:-mysql}"
+MYSQL_USER="${MYSQL_USER:-focalboard}"
+MYSQL_PASSWORD="${MYSQL_PASSWORD:-powerpassword}"
+MYSQL_HOST="${MYSQL_HOST:-focalboard-db}"
+MYSQL_PORT="${MYSQL_PORT:-3306}"
+MYSQL_DATABASE="${MYSQL_DATABASE:-focalboard}"
+
+# List of required variables for the check
 required_vars=(
   "DB_TYPE"
   "MYSQL_USER"
@@ -19,7 +27,7 @@ for var in "${required_vars[@]}"; do
 done
 
 # Backup the original configuration file
-mv /go/src/focalboard/docker/conf.json /go/src/focalboard/docker/conf.json.backup
+mv /opt/focalboard/config.json /opt/focalboard/config.json.backup
 
 # Create the new configuration file with the required environment variables
 printf '%s\n' "{
