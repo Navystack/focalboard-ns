@@ -3,7 +3,7 @@ ARG TARGETOS
 ARG TARGETARCH
 
 WORKDIR /focalboard
-RUN git clone https://github.com/NavyStack/focalboard.git .
+RUN git clone https://github.com/AskFront/focalboard-af.git .
 
 FROM base AS nodebuild
 WORKDIR /focalboard/webapp

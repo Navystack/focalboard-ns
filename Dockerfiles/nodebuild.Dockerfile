@@ -5,7 +5,7 @@ ARG FINAL_VERSION=bookworm-slim
 
 FROM node:${NODE_VERSION} as nodebuild
 
-RUN git clone --depth=1 https://github.com/navystack/focalboard.git && \
+RUN git clone --depth=1 https://github.com/AskFront/focalboard-af.git && \
     cp --recursive /focalboard/webapp/ /webapp 
 WORKDIR /webapp
 

@@ -121,7 +121,7 @@ NavyStack의 가이드 뿐만 아니라, 아니라 모든 종류의 질문을 �
 
 - DB를 PgSQL로 사용하려면 [공식 Focalboard Github 참고](https://github.com/mattermost/focalboard) <br> (공식 Github 예제는 PgSQL만 있고, Mysql(MariaDB)는 없어서 예제로 작성함)
 
-- 한글 번역은 현재 이미지에만 적용되어있으며, 변경 내용은 [여기에서](https://github.com/NavyStack/focalboard.git) 확인 가능
+- 한글 번역은 현재 이미지에만 적용되어있으며, 변경 내용은 [여기에서](https://github.com/AskFront/focalboard-af.git) 확인 가능
 
 - Dockerfile은 [여기에서](https://github.com/NavyStack/focalboard-ns.git) 확인가능
 

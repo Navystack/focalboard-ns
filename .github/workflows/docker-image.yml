@@ -44,7 +44,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Docker Build and Push (with Nginx)
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           tags: |
@@ -57,14 +57,14 @@ jobs:
           outputs: type=image,push=true
 
       - name: Docker Build and Push (Focalboard Only)
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           tags: |
             navystack/focalboard:latest-${{ env.NOW }}
-            navystack/focalboard:7.12.0
+            navystack/focalboard:8.0.0
             navystack/focalboard:latest
-            ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/focalboard-ns:7.12.0
+            ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/focalboard-ns:8.0.0
             ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/focalboard-ns:nginx-${{ env.NOW }}
             ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/focalboard-ns:latest
           platforms: linux/amd64,linux/arm64
