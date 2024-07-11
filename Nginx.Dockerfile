@@ -20,7 +20,7 @@ WORKDIR /go/src/focalboard
 RUN EXCLUDE_PLUGIN=true EXCLUDE_SERVER=true EXCLUDE_ENTERPRISE=true make server-docker os=${TARGETOS} arch=${TARGETARCH}
 
 # 최적화 및 단축 단계
-FROM node:lts AS layershorter
+FROM nginx:1.25.4 AS layershorter
 RUN mkdir -p /opt/focalboard/data/files && \
     chown -R nobody:nogroup /opt/focalboard
 COPY --from=nodebuild --chown=nobody:nogroup /focalboard/webapp/pack /opt/focalboard/pack/
