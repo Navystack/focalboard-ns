@@ -1,0 +1,17 @@
+{
+    "serverRoot": "http://localhost:8000",
+    "port": 8000,
+    "dbtype": "",
+    "dbconfig": ":@tcp(:)/",
+    "useSSL": false,
+    "webpath": "./pack",
+    "filespath": "./data/files",
+    "telemetry": true,
+    "prometheusaddress": ":9092",
+    "session_expire_time": 2592000,
+    "session_refresh_time": 18000,
+    "localOnly": false,
+    "enableLocalMode": true,
+    "localModeSocketLocation": "/var/tmp/focalboard_local.socket",
+    "enablePublicSharedBoards": true
+}

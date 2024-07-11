@@ -1,5 +1,7 @@
 #!/bin/bash
 
-"/usr/local/openresty/bin/openresty" "-g" "daemon off;" &
+# Start OpenResty in the background
+/usr/local/openresty/bin/openresty -g "daemon off;" &
 
-/opt/focalboard/bin/focalboard-server
+# Start the Focalboard server
+exec /opt/focalboard/bin/focalboard-server

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Start nginx in the background
 nginx -g "daemon off;" &
 
-/opt/focalboard/bin/focalboard-server
+# Start the Focalboard server
+exec /opt/focalboard/bin/focalboard-server
