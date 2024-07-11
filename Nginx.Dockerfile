@@ -1,5 +1,5 @@
 # Base 이미지 설정
-FROM node:lts as base
+FROM node:lts AS base
 ARG TARGETOS
 ARG TARGETARCH
 WORKDIR /focalboard
@@ -34,7 +34,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # 최종 이미지 설정
-FROM nginx:1.25.4 as final
+FROM nginx:1.25.4 AS final
 WORKDIR /opt/focalboard
 COPY --from=layershorter /usr/bin/tini /usr/bin/tini
 COPY --from=layershorter --chown=nobody:nogroup /opt/focalboard/ /opt/focalboard
@@ -44,7 +44,7 @@ COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80/tcp 9092/tcp
 VOLUME /opt/focalboard/data
-ADD scripts/focalboard-nginx.sh /
+COPY scripts/focalboard-nginx.sh /
 
 ENTRYPOINT ["tini", "--", "/docker-entrypoint.sh"]
 CMD ["/focalboard-nginx.sh"]

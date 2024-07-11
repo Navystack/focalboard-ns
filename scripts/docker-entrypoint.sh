@@ -1,30 +1,66 @@
 #!/bin/bash
 
-# Required environment variables with their default values
-DB_TYPE="${DB_TYPE:-mysql}"
-MYSQL_USER="${MYSQL_USER:-focalboard}"
-MYSQL_PASSWORD="${MYSQL_PASSWORD:-powerpassword}"
-MYSQL_HOST="${MYSQL_HOST:-focalboard-db}"
-MYSQL_PORT="${MYSQL_PORT:-3306}"
-MYSQL_DATABASE="${MYSQL_DATABASE:-focalboard}"
+set -e
 
-# List of required variables for the check
-required_vars=(
-  "DB_TYPE"
-  "MYSQL_USER"
-  "MYSQL_PASSWORD"
-  "MYSQL_HOST"
-  "MYSQL_PORT"
-  "MYSQL_DATABASE"
-)
+# Check if DB_TYPE is not defined but /opt/focalboard/config.json file exists
+if [ -z "$DB_TYPE" ] && [ -f "/opt/focalboard/config.json" ]; then
+  # Execute the provided command
+  exec "$@"
+fi
 
-# Check if any required environment variables are missing
+# Check if DB_TYPE is defined
+if [ -z "$DB_TYPE" ]; then
+  echo "Error: DB_TYPE is not defined. Please set DB_TYPE environment variable."
+  exit 1
+fi
+
+# Validate DB_TYPE
+case "$DB_TYPE" in
+  mysql|pgsql|postgres|sqlite3)
+    ;;
+  *)
+    echo "Error: Unsupported DB_TYPE: $DB_TYPE. Supported types are mysql, pgsql, postgres, sqlite3."
+    exit 1
+    ;;
+esac
+
+# Check required environment variables based on DB_TYPE
+case "$DB_TYPE" in
+  mysql)
+    required_vars=("MYSQL_USER" "MYSQL_PASSWORD" "MYSQL_HOST" "MYSQL_PORT" "MYSQL_DATABASE")
+    ;;
+  pgsql|postgres)
+    required_vars=("PGSQL_USER" "PGSQL_PASSWORD" "PGSQL_HOST" "PGSQL_DATABASE")
+    ;;
+  sqlite3)
+    required_vars=("SQLITE_DB_PATH")
+    ;;
+esac
+
+# Check for missing required environment variables
 for var in "${required_vars[@]}"; do
   if [ -z "${!var}" ]; then
-    echo "Required environment variable $var is not set. Exiting..."
+    echo "Error: Required environment variable $var is not set for $DB_TYPE."
     exit 1
   fi
 done
+
+# Determine dbconfig based on DB_TYPE and prioritize DB_CONFIG_STRING if defined
+if [ -n "$DB_CONFIG_STRING" ]; then
+  DB_CONFIG="$DB_CONFIG_STRING"
+else
+  case "$DB_TYPE" in
+    mysql)
+      DB_CONFIG="$MYSQL_USER:$MYSQL_PASSWORD@tcp($MYSQL_HOST:$MYSQL_PORT)/$MYSQL_DATABASE"
+      ;;
+    pgsql|postgres)
+      DB_CONFIG="postgres://$PGSQL_USER:$PGSQL_PASSWORD@$PGSQL_HOST/$PGSQL_DATABASE?sslmode=disable&connect_timeout=10"
+      ;;
+    sqlite3)
+      DB_CONFIG="$SQLITE_DB_PATH?_busy_timeout=5000"
+      ;;
+  esac
+fi
 
 # Backup the original configuration file
 mv /opt/focalboard/config.json /opt/focalboard/config.json.backup
@@ -34,7 +70,7 @@ printf '%s\n' "{
     \"serverRoot\": \"http://localhost:8000\",
     \"port\": 8000,
     \"dbtype\": \"$DB_TYPE\",
-    \"dbconfig\": \"$MYSQL_USER:$MYSQL_PASSWORD@tcp($MYSQL_HOST:$MYSQL_PORT)/$MYSQL_DATABASE\",
+    \"dbconfig\": \"$DB_CONFIG\",
     \"useSSL\": false,
     \"webpath\": \"./pack\",
     \"filespath\": \"./data/files\",
@@ -47,8 +83,6 @@ printf '%s\n' "{
     \"localModeSocketLocation\": \"/var/tmp/focalboard_local.socket\",
     \"enablePublicSharedBoards\": true
 }" > /opt/focalboard/config.json
-
-chown -R nobody:nogroup /opt/focalboard
 
 # Execute the provided command
 exec "$@"
