@@ -48,7 +48,7 @@ FROM nginx:1.26.0 AS final
 WORKDIR /opt/focalboard
 COPY --from=layershorter /usr/bin/tini /usr/bin/tini
 COPY --from=layershorter --chown=nobody:nogroup /opt/focalboard/ /opt/focalboard
-# COPY --from=layershorter /usr/lib/nginx/modules/*.so /usr/lib/nginx/modules/
+COPY --from=layershorter /usr/lib/nginx/modules/*.so /usr/lib/nginx/modules/
 COPY --from=layershorter /etc/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 
