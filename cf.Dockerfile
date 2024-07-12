@@ -30,7 +30,7 @@ WORKDIR /go/src/focalboard
 RUN EXCLUDE_PLUGIN=true EXCLUDE_SERVER=true EXCLUDE_ENTERPRISE=true make server-docker os=${TARGETOS} arch=${TARGETARCH}
 
 # 최적화 및 단축 단계
-FROM navystack/ngx_mod:1.26.0 AS layershorter
+FROM node:lts AS layershorter
 RUN mkdir -p /opt/focalboard/data/files && \
     chown -R nobody:nogroup /opt/focalboard
 COPY --from=nodebuild --chown=nobody:nogroup /focalboard/webapp/pack /opt/focalboard/pack/
@@ -44,17 +44,51 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # 최종 이미지 설정
-FROM nginx:1.26.0 AS final
+FROM debian:bookworm-slim AS final
+ENV GOSU_VERSION="1.17"
+
+RUN set -eux; \
+    groupadd --gid 1001 focalboard; \
+    useradd --uid 1001 --gid 1001 --home-dir /opt/focalboard focalboard; \
+    install -d -o focalboard -g focalboard -m 700 /opt/focalboard
+
+RUN set -eux; \
+    # save list of currently installed packages for later so we can clean up
+    savedAptMark="$(apt-mark showmanual)"; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends ca-certificates gnupg wget; \
+    rm -rf /var/lib/apt/lists/*; \
+    \
+    dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
+    wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch"; \
+    wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch.asc"; \
+    \
+    # verify the signature
+    export GNUPGHOME="$(mktemp -d)"; \
+    gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4; \
+    gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \
+    gpgconf --kill all; \
+    rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc; \
+    \
+    # clean up fetch dependencies
+    apt-mark auto '.*' > /dev/null; \
+    [ -z "$savedAptMark" ] || apt-mark manual $savedAptMark; \
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
+    \
+    chmod +x /usr/local/bin/gosu; \
+    # verify that the binary works
+    gosu --version; \
+    gosu nobody true
+
 WORKDIR /opt/focalboard
+
 COPY --from=layershorter /usr/bin/tini /usr/bin/tini
-COPY --from=layershorter --chown=nobody:nogroup /opt/focalboard/ /opt/focalboard
-# COPY --from=layershorter /usr/lib/nginx/modules/*.so /usr/lib/nginx/modules/
-COPY --from=layershorter /etc/nginx/nginx.conf /etc/nginx/nginx.conf
-COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY --from=layershorter --chown=focalboard:focalboard /opt/focalboard/ /opt/focalboard
 
-EXPOSE 80/tcp 9092/tcp
+EXPOSE 8000/tcp
 VOLUME /opt/focalboard/data
-COPY scripts/focalboard-nginx.sh /
+COPY scripts/docker-entrypoint.sh /
 
-ENTRYPOINT ["tini", "--", "/docker-entrypoint.sh"]
-CMD ["/focalboard-nginx.sh"]
+ENTRYPOINT [ "tini", "--", "/docker-entrypoint.sh" ]
+
+CMD [ "/opt/focalboard/bin/focalboard-server" ]

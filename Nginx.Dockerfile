@@ -20,7 +20,7 @@ WORKDIR /go/src/focalboard
 RUN EXCLUDE_PLUGIN=true EXCLUDE_SERVER=true EXCLUDE_ENTERPRISE=true make server-docker os=${TARGETOS} arch=${TARGETARCH}
 
 # 최적화 및 단축 단계
-FROM nginx:1.25.4 AS layershorter
+FROM navystack/ngx_mod:1.26.0 AS layershorter
 RUN mkdir -p /opt/focalboard/data/files && \
     chown -R nobody:nogroup /opt/focalboard
 COPY --from=nodebuild --chown=nobody:nogroup /focalboard/webapp/pack /opt/focalboard/pack/
@@ -34,7 +34,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # 최종 이미지 설정
-FROM nginx:1.25.4 AS final
+FROM nginx:1.26.0 AS final
 WORKDIR /opt/focalboard
 COPY --from=layershorter /usr/bin/tini /usr/bin/tini
 COPY --from=layershorter --chown=nobody:nogroup /opt/focalboard/ /opt/focalboard
