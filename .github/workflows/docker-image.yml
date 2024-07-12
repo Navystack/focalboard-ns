@@ -43,6 +43,19 @@ jobs:
           username: ${{ env.REPO_OWNER_LOWERCASE }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Docker Build and Push (Cloudflare R2 Support)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          tags: |
+            navystack/focalboard:cf-${{ env.NOW }}
+            navystack/focalboard:cf
+            ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/focalboard-ns:cf
+            ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/focalboard-ns:cf-${{ env.NOW }}
+          file: r2.Dockerfile
+          platforms: linux/amd64,linux/arm64
+          outputs: type=image,push=true
+
       - name: Docker Build and Push (with Nginx)
         uses: docker/build-push-action@v6
         with:

@@ -56,6 +56,7 @@ if [ "$(id -u)" = '0' ]; then
           esac
       else
           DB_CONFIG="$DB_CONFIG_STRING"
+          DB_TYPE="$DB_TYPE"
       fi
 
       # Generate config.json file
