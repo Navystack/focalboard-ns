@@ -8,6 +8,9 @@ RUN git clone https://github.com/AskFront/focalboard-af.git .
 # Node.js 빌드 단계
 FROM base AS nodebuild
 WORKDIR /focalboard/webapp
+RUN apt-get update \ 
+    && apt-get install -y --no-install-recommends \
+    libtool automake autoconf pkg-config nasm build-essential
 RUN CPPFLAGS="-DPNG_ARM_NEON_OPT=0" npm install --no-optional && \
     npm run pack
 
