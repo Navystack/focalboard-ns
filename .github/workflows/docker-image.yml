@@ -48,11 +48,24 @@ jobs:
         with:
           context: .
           tags: |
+            navystack/focalboard:r2-${{ env.NOW }}
+            navystack/focalboard:r2
+            ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/focalboard-ns:r2
+            ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/focalboard-ns:r2-${{ env.NOW }}
+          file: r2.Dockerfile
+          platforms: linux/amd64,linux/arm64
+          outputs: type=image,push=true
+
+      - name: Docker Build and Push (Cloudflare R2 Support)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          tags: |
             navystack/focalboard:cf-${{ env.NOW }}
             navystack/focalboard:cf
             ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/focalboard-ns:cf
             ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/focalboard-ns:cf-${{ env.NOW }}
-          file: r2.Dockerfile
+          file: cf.Dockerfile
           platforms: linux/amd64,linux/arm64
           outputs: type=image,push=true
 
